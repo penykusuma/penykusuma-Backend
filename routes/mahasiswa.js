@@ -1,12 +1,15 @@
 const express = require('express');
-const routerMhs = express.Router();
-const ctrMhs = require('../controller/mahasiswa')
+const routerMahasiswa = express.Router();
 
-// endpoint untuk mahasiswa
-routerMhs.get('/mahasiswa', ctrMhs.getMhs);
-routerMhs.get('/mahasiswa/:nim', ctrMhs.getbynim );
-routerMhs.post('/mahasiswa', ctrMhs.postbyMhs);
-routerMhs.put('/mahasiswa/:nim', ctrMhs.putbynim);
-routerMhs.delete('/mahasiswa/:nim', ctrMhs.deletebynim);
+const controllerMahasiswa = require('../controller/mahasiswa')
 
-module.exports = routerMhs
+routerMahasiswa.route('/mahasiswa')
+    .post(controllerMahasiswa.insert)
+    .get(controllerMahasiswa.getMahasiswa)
+
+routerMahasiswa.route('/mahasiswa/:nim')
+    .get(controllerMahasiswa.getMahasiswaByNim)
+    .put(controllerMahasiswa.update)
+    .delete(controllerMahasiswa.delete)
+
+module.exports = routerMahasiswa

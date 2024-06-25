@@ -1,81 +1,64 @@
-const connection = require('../db/db') 
+const Mahasiswa = require('../models/mahasiswa')
 
 module.exports = {
-    getMhs:(req, res) => {
-        connection.query("SELECT * FROM mahasiswa", (err, data) => {
-            if (err) {
-                console.log("error: ", err);
-                res.status(500).send({
-                    message: err.message || "Terjadi kesalahan saat mengambil data mahasiswa"
-                });
-            } else {
-                res.send(data);
-            };
-        });
+    insert: async (req, res) => {
+        const data = new Mahasiswa({
+            nim: req.body.nim,
+            nama: req.body.nama,
+            angkatan: req.body.angkatan,
+            prodi: req.body.prodi,
+        })
+
+        try {
+            const dataToSave = await data.save();
+            res.status(200).json(dataToSave)
+        } catch (error) {
+            res.status(400).json({message: error.message})
+        }
     },
 
-    getbynim:(req, res) => {
-        const nim = req.params.nim;
-        connection.query(`SELECT * FROM mahasiswa WHERE nim= '${nim}'`, (err, data) => {
-            if (err) {
-                console.log("error: ", err);
-                res.status(500).send({
-                    message: err.message || "Terjadi kesalahan saat mengambil data mahasiswa"
-                });
-            } else {
-                res.send(data);
-            }
-        });
+    getMahasiswa: async (req, res) => {
+        try {
+            const data = await Mahasiswa.find();
+            res.json(data)
+        } catch (error) {
+            res.status(500).json({ message: error.message})
+        }
     },
-    postbyMhs: (req, res) => {
-        const mahasiswabaru = req.body;
-        connection.query("INSERT INTO mahasiswa SET ?", mahasiswabaru, (err) => {
-            if (err) {
-                console.log("error: ", err);
-                res.status(500).send({
-                    message: err.message || "terjadi kesalahan saat menyimpan data mahasiswa"
-                });
-            } else {
-                res.send(mahasiswabaru);
-            }
-        });
+
+    getMahasiswaByNim: async (req, res) => {
+        const nim = req.params.nim
+        try {
+            const data = await Mahasiswa.find().where('nim').equals(nim)
+            res.json(data)
+        } catch (error) {
+            res.status(500).json({ message: error.message })
+        }
     },
-    putbynim: (req, res) => {
-        const nim = req.params.nim;
-        const mhs = req.body;
-        const qstring = `UPDATE mahasiswa
-                        SET nama = '${mhs.nama}', angkatan = '${mhs.angkatan}', prodi = '${mhs.prodi}'
-                        WHERE nim = '${nim}'`;
-        connection.query(qstring, (err, data) => {
-            if (err) {
-                res.status(500).send({
-                    message: err.message || "error update mahasiswa dengan nim" + nim
-                });
-            } else if (data.affectedRows === 0) {
-                res.status(404).send({
-                    message: `mahasiswa dengan NIM ${nim} tidak ditemukan`
-                });
-            } else {
-                console.log("update mahasiswa: ", { nim: nim, ...mhs });
-                res.send({ message: `Data mahasiswa dengan NIM ${nim} berhasil diupdate` });
-            }
-        });
+
+    update: async (req, res) => {
+        const filter = { nim: req.params.nim }
+        const updateData = {
+            nim : req.params.nim,
+            nama: req.body.nama,
+            angkatan: req.body.angkatan,
+            prodi: req.body.prodi,
+        }
+        try {
+            await Mahasiswa.updateOne(filter, updateData)
+            res.status(200).json(updateData)
+        } catch (error) {
+            res.status(409).json({ message: error.message})
+        }
     },
-    deletebynim: (req, res) => {
-        const nim = req.params.nim;
-        const string = `DELETE FROM mahasiswa WHERE nim = '${nim}'`;
-        connection.query(string, (err, data) => {
-            if (err) {
-                res.status(500).send({
-                    message: "error deleting mahasiswa dengan nim: " + nim
-                });
-            } else if (data.affectedRows === 0) {
-                res.status(404).send({
-                    message: `mahasiswa dengan nim ${nim} tidak ditemukan`
-                });
-            } else {
-                res.send(`mahasiswa dengan nim ${nim} telah dihapus`);
-            }
-        });
-    }
+
+    delete: async (req, res) => {
+        const filter = { nim: req.params.nim }
+        try {
+            await Mahasiswa.deleteOne(filter)
+            res.send("data telah terhapus")
+        } catch (error) {
+            res.status(409).json({ message: error.message})
+        }
+    },
 }
