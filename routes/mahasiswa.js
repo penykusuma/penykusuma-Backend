@@ -3,6 +3,10 @@ const routerMahasiswa = express.Router();
 
 const controllerMahasiswa = require('../controller/mahasiswa')
 
+routerMahasiswa.route('/mahasiswa/nilai/:nim')
+.get(controllerMahasiswa.getNilaiByNim)
+.put(controllerMahasiswa.insertNilai)
+
 routerMahasiswa.route('/mahasiswa')
     .post(controllerMahasiswa.insert)
     .get(controllerMahasiswa.getMahasiswa)
